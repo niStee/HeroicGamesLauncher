@@ -867,8 +867,34 @@ async function shutdownWine(gameSettings: GameSettings) {
   }
 }
 
-const getShellPath = async (path: string): Promise<string> =>
-  normalize((await execAsync(`echo ${path}`)).stdout.trim())
+function expandPathVariables(inputPath: string): string {
+  let result = inputPath
+
+  // Expand leading tilde to the user's home directory
+  const homeDir = process.env.HOME || process.env.USERPROFILE
+  if (homeDir && result.startsWith('~')) {
+    result = homeDir + result.slice(1)
+  }
+
+  // Expand Windows-style variables: %VAR_NAME%
+  result = result.replace(/%([^%]+)%/g, (_, varName: string) => {
+    const value = process.env[varName]
+    return value !== undefined ? value : `%${varName}%`
+  })
+
+  // Expand Unix-style variables: $VAR or ${VAR}
+  result = result.replace(/\$([A-Za-z_][A-Za-z0-9_]*)|\$\{([^}]+)\}/g, (match, var1: string, var2: string) => {
+    const varName = var1 || var2
+    const value = process.env[varName]
+    return value !== undefined ? value : match
+  })
+
+  return normalize(result)
+}
+
+const getShellPath = async (path: string): Promise<string> => {
+  return expandPathVariables(path)
+}
 
 export const spawnAsync = async (
   command: string,
