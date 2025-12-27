@@ -15,15 +15,32 @@ import {
 } from 'frontend/components/UI/Dialog'
 
 const validStoredUrl = (url: string, store: string) => {
+  let hostname: string | null = null
+
+  try {
+    const parsed = new URL(url)
+    hostname = parsed.hostname.toLowerCase()
+  } catch {
+    return false
+  }
+
   switch (store) {
-    case 'epic':
-      return url.includes('epicgames.com')
-    case 'gog':
-      return url.includes('gog.com')
-    case 'amazon':
-      return url.includes('gaming.amazon.com')
-    case 'zoom':
-      return url.includes('zoom-platform.com')
+    case 'epic': {
+      const allowedEpicHosts = ['epicgames.com', 'www.epicgames.com', 'store.epicgames.com']
+      return allowedEpicHosts.includes(hostname)
+    }
+    case 'gog': {
+      const allowedGogHosts = ['gog.com', 'www.gog.com']
+      return allowedGogHosts.includes(hostname)
+    }
+    case 'amazon': {
+      const allowedAmazonHosts = ['gaming.amazon.com', 'www.gaming.amazon.com']
+      return allowedAmazonHosts.includes(hostname)
+    }
+    case 'zoom': {
+      const allowedZoomHosts = ['zoom-platform.com', 'www.zoom-platform.com']
+      return allowedZoomHosts.includes(hostname)
+    }
     default:
       return false
   }
