@@ -99,7 +99,7 @@ export default function WebView() {
   if (pathname.match(/store-page/)) {
     const searchParams = new URLSearchParams(search)
     const queryParam = searchParams.get('store-url')
-    if (queryParam) {
+    if (queryParam && store && validStoredUrl(queryParam, store)) {
       startUrl = queryParam
     }
   }
