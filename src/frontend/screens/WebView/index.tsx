@@ -14,16 +14,35 @@ import {
   DialogHeader
 } from 'frontend/components/UI/Dialog'
 
+const isAllowedHost = (hostname: string, baseDomain: string): boolean => {
+  if (!hostname) {
+    return false
+  }
+  if (hostname === baseDomain) {
+    return true
+  }
+  return hostname.endsWith(`.${baseDomain}`)
+}
+
 const validStoredUrl = (url: string, store: string) => {
+  let hostname: string
+
+  try {
+    const parsed = new URL(url)
+    hostname = parsed.hostname
+  } catch {
+    return false
+  }
+
   switch (store) {
     case 'epic':
-      return url.includes('epicgames.com')
+      return isAllowedHost(hostname, 'epicgames.com')
     case 'gog':
-      return url.includes('gog.com')
+      return isAllowedHost(hostname, 'gog.com')
     case 'amazon':
-      return url.includes('gaming.amazon.com')
+      return isAllowedHost(hostname, 'gaming.amazon.com')
     case 'zoom':
-      return url.includes('zoom-platform.com')
+      return isAllowedHost(hostname, 'zoom-platform.com')
     default:
       return false
   }
